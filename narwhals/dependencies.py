@@ -11,6 +11,7 @@ from narwhals._exceptions import issue_warning
 if TYPE_CHECKING:
     import cudf
     import dask.dataframe as dd
+    import datafusion
     import duckdb
     import ibis
     import modin.pandas as mpd
@@ -89,6 +90,11 @@ def get_dask() -> Any:  # pragma: no cover
 def get_dask_dataframe() -> Any:
     """Get dask.dataframe module (if already imported - else return None)."""
     return sys.modules.get("dask.dataframe", None)
+
+
+def get_datafusion() -> Any:
+    """Get datafusion module (if already imported - else return None)."""
+    return sys.modules.get("datafusion", None)
 
 
 def get_duckdb() -> Any:
@@ -253,6 +259,18 @@ def is_dask_dataframe(df: Any) -> TypeIs[dd.DataFrame]:
     """
     _warn_if_narwhals_df_or_lf(df)
     return (dd := get_dask_dataframe()) is not None and isinstance(df, dd.DataFrame)
+
+
+def is_datafusion_dataframe(df: Any) -> TypeIs[datafusion.DataFrame]:
+    """Check whether `df` is a DataFusion DataFrame without importing DataFusion.
+
+    Warning:
+        This method cannot be called on Narwhals DataFrame/LazyFrame.
+    """
+    _warn_if_narwhals_df_or_lf(df)
+    return (datafusion := get_datafusion()) is not None and isinstance(
+        df, datafusion.DataFrame
+    )
 
 
 def is_duckdb_relation(df: Any) -> TypeIs[duckdb.DuckDBPyRelation]:

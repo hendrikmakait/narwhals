@@ -52,6 +52,7 @@ MODULES = [
 BACKENDS = [
     Backend(name="arrow", module="_arrow", type_=BackendType.EAGER),
     Backend(name="dask", module="_dask", type_=BackendType.LAZY),
+    Backend(name="datafusion", module="_datafusion", type_=BackendType.LAZY),
     Backend(name="duckdb", module="_duckdb", type_=BackendType.LAZY),
     Backend(name="pandas-like", module="_pandas_like", type_=BackendType.EAGER),
     Backend(name="spark-like", module="_spark_like", type_=BackendType.LAZY),

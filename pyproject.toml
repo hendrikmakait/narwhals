@@ -45,6 +45,7 @@ dask = ["dask[dataframe]>=2024.8"]
 duckdb = ["duckdb>=1.0"]
 ibis = ["ibis-framework>=6.0.0", "rich", "packaging", "pyarrow_hotfix"]
 sqlframe = ["sqlframe>=3.22.0,!=3.39.3"]
+datafusion = ["datafusion>=50.0.0"]
 
 [dependency-groups]
 core = [
@@ -75,6 +76,7 @@ typing = [  # keep some of these pinned and bump periodically so there's fewer s
   "polars==1.32.2",
   "uv",
   "narwhals[ibis]",
+  "datafusion",
 ]
 typing-ci = [
   "narwhals[dask,modin]",
@@ -95,6 +97,7 @@ docs = [
   "pandas",
   "polars>=1.0.0",
   "pyarrow",
+  "datafusion"
 ]
 dev = [
   "pre-commit",

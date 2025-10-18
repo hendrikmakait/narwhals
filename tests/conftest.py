@@ -15,6 +15,7 @@ from tests.utils import ID_PANDAS_LIKE, PANDAS_VERSION, pyspark_session, sqlfram
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    import datafusion
     import duckdb
     import ibis
     import pandas as pd
@@ -43,7 +44,7 @@ if default_constructors := os.environ.get(
     DEFAULT_CONSTRUCTORS = default_constructors
 else:
     DEFAULT_CONSTRUCTORS = (
-        "pandas,pandas[pyarrow],polars[eager],pyarrow,duckdb,sqlframe,ibis"
+        "pandas,pandas[pyarrow],polars[eager],pyarrow,duckdb,sqlframe,ibis,datafusion"
     )
 
 
@@ -214,6 +215,13 @@ def ibis_lazy_constructor(obj: Data) -> ibis.Table:  # pragma: no cover
     return _ibis_backend().create_table(table_name, ldf)
 
 
+def datafusion_lazy_constructor(obj: Data) -> datafusion.DataFrame:
+    import datafusion
+
+    ctx = datafusion.SessionContext()
+    return ctx.from_pydict(obj)
+
+
 EAGER_CONSTRUCTORS: dict[str, ConstructorEager] = {
     "pandas": pandas_constructor,
     "pandas[nullable]": pandas_nullable_constructor,
@@ -231,6 +239,7 @@ LAZY_CONSTRUCTORS: dict[str, ConstructorLazy] = {
     "pyspark": pyspark_lazy_constructor,  # type: ignore[dict-item]
     "sqlframe": sqlframe_pyspark_lazy_constructor,
     "ibis": ibis_lazy_constructor,
+    "datafusion": datafusion_lazy_constructor,
 }
 GPU_CONSTRUCTORS: dict[str, ConstructorEager] = {"cudf": cudf_constructor}
 

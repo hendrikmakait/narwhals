@@ -19,6 +19,7 @@ from narwhals.dependencies import (
     get_pandas,
     is_cupy_scalar,
     is_dask_dataframe,
+    is_datafusion_dataframe,
     is_duckdb_relation,
     is_ibis_table,
     is_numpy_scalar,
@@ -466,6 +467,19 @@ def _from_native_impl(  # noqa: C901, PLR0911, PLR0912, PLR0915
             raise ImportError(msg)
         return (
             version.namespace.from_backend(Implementation.DASK)
+            .compliant.from_native(native_object)
+            .to_narwhals()
+        )
+
+    # DataFusion
+    if is_datafusion_dataframe(native_object):
+        if eager_only or series_only:
+            if not pass_through:
+                msg = "Cannot only use `series_only=True` or `eager_only=False` with DataFusionDataFrame"
+                raise TypeError(msg)
+            return native_object
+        return (
+            version.namespace.from_native_object(native_object)
             .compliant.from_native(native_object)
             .to_narwhals()
         )

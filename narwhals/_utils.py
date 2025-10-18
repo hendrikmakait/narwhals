@@ -31,6 +31,7 @@ from narwhals._typing_compat import assert_never, deprecated
 from narwhals.dependencies import (
     get_cudf,
     get_dask_dataframe,
+    get_datafusion,
     get_duckdb,
     get_ibis,
     get_modin,
@@ -348,6 +349,8 @@ class Implementation(NoAutoEnum):
     """SQLFrame implementation."""
     PYSPARK_CONNECT = "pyspark[connect]"
     """PySpark Connect implementation."""
+    DATAFUSION = "datafusion"
+    """"DataFusion implementation."""
     UNKNOWN = "unknown"
     """Unknown implementation."""
 
@@ -371,6 +374,7 @@ class Implementation(NoAutoEnum):
             get_pyspark_sql(): Implementation.PYSPARK,
             get_polars(): Implementation.POLARS,
             get_dask_dataframe(): Implementation.DASK,
+            get_datafusion(): Implementation.DATAFUSION,
             get_duckdb(): Implementation.DUCKDB,
             get_ibis(): Implementation.IBIS,
             get_sqlframe(): Implementation.SQLFRAME,
@@ -551,6 +555,19 @@ class Implementation(NoAutoEnum):
         """
         return self is Implementation.DASK  # pragma: no cover
 
+    def is_datafusion(self) -> bool:
+        """Return whether implementation is DataFusion.
+
+        Examples:
+            >>> import polars as pl
+            >>> import narwhals as nw
+            >>> df_native = pl.DataFrame({"a": [1, 2, 3]})
+            >>> df = nw.from_native(df_native)
+            >>> df.implementation.is_datafusion()
+            False
+        """
+        return self is Implementation.DATAFUSION  # pragma: no cover
+
     def is_duckdb(self) -> bool:
         """Return whether implementation is DuckDB.
 
@@ -604,6 +621,7 @@ MIN_VERSIONS: Mapping[Implementation, tuple[int, ...]] = {
     Implementation.PYSPARK_CONNECT: (3, 5),
     Implementation.POLARS: (0, 20, 4),
     Implementation.DASK: (2024, 8),
+    Implementation.DATAFUSION: (50,),
     Implementation.DUCKDB: (1,),
     Implementation.IBIS: (6,),
     Implementation.SQLFRAME: (3, 22, 0),

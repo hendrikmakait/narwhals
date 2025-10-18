@@ -22,6 +22,7 @@ from narwhals.dependencies import (
     get_polars,
     get_pyarrow,
     is_dask_dataframe,
+    is_datafusion_dataframe,
     is_duckdb_relation,
     is_ibis_table,
     is_pyspark_connect_dataframe,
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
     from collections.abc import Collection, Sized
     from typing import ClassVar
 
+    import datafusion
     import duckdb
     import pandas as pd
     import polars as pl
@@ -41,6 +43,7 @@ if TYPE_CHECKING:
 
     from narwhals._arrow.namespace import ArrowNamespace
     from narwhals._dask.namespace import DaskNamespace
+    from narwhals._datafusion.namespace import DataFusionNamespace
     from narwhals._duckdb.namespace import DuckDBNamespace
     from narwhals._ibis.namespace import IbisNamespace
     from narwhals._pandas_like.namespace import PandasLikeNamespace
@@ -51,6 +54,7 @@ if TYPE_CHECKING:
         Arrow,
         Backend,
         Dask,
+        DataFusion,
         DuckDB,
         EagerAllowed,
         Ibis,
@@ -136,8 +140,9 @@ if TYPE_CHECKING:
     _NativeSparkLike: TypeAlias = (
         "_NativeSQLFrame | _NativePySpark | _NativePySparkConnect"
     )
+    _NativeDataFusion: TypeAlias = "datafusion.DataFrame"
 
-    NativeKnown: TypeAlias = "_NativePolars | _NativeArrow | _NativePandasLike | _NativeSparkLike | _NativeDuckDB | _NativeDask | _NativeIbis"
+    NativeKnown: TypeAlias = "_NativePolars | _NativeArrow | _NativePandasLike | _NativeSparkLike | _NativeDuckDB | _NativeDask | _NativeIbis | _NativeDataFusion"
     NativeUnknown: TypeAlias = "NativeDataFrame | NativeSeries | NativeLazyFrame"
     NativeAny: TypeAlias = "NativeKnown | NativeUnknown"
 
@@ -205,6 +210,10 @@ class Namespace(Generic[CompliantNamespaceT_co]):
 
     @overload
     @classmethod
+    def from_backend(cls, backend: DataFusion, /) -> Namespace[DataFusionNamespace]: ...
+
+    @overload
+    @classmethod
     def from_backend(cls, backend: EagerAllowed, /) -> EagerAllowedNamespace: ...
 
     @overload
@@ -260,6 +269,10 @@ class Namespace(Generic[CompliantNamespaceT_co]):
             from narwhals._ibis.namespace import IbisNamespace
 
             ns = IbisNamespace(version=version)
+        elif impl.is_datafusion():
+            from narwhals._datafusion.namespace import DataFusionNamespace
+
+            ns = DataFusionNamespace(version=version)
         else:
             msg = "Not supported Implementation"  # pragma: no cover
             raise AssertionError(msg)
@@ -322,11 +335,17 @@ class Namespace(Generic[CompliantNamespaceT_co]):
     @overload
     @classmethod
     def from_native_object(
+        cls, native: _NativeDataFusion, /
+    ) -> Namespace[DataFusionNamespace]: ...
+
+    @overload
+    @classmethod
+    def from_native_object(
         cls, native: NativeUnknown, /
     ) -> Namespace[CompliantNamespaceAny]: ...
 
     @classmethod
-    def from_native_object(
+    def from_native_object(  # noqa: C901
         cls: type[Namespace[Any]], native: NativeAny, /
     ) -> Namespace[Any]:
         impl: Backend
@@ -346,6 +365,8 @@ class Namespace(Generic[CompliantNamespaceT_co]):
             )
         elif is_native_dask(native):  # pragma: no cover
             impl = Implementation.DASK
+        elif is_native_datafusion(native):
+            impl = Implementation.DATAFUSION
         elif is_native_duckdb(native):
             impl = Implementation.DUCKDB
         elif is_native_cudf(native):  # pragma: no cover
@@ -374,6 +395,10 @@ def is_native_arrow(obj: Any) -> TypeIs[_NativeArrow]:
 
 def is_native_dask(obj: Any) -> TypeIs[_NativeDask]:
     return is_dask_dataframe(obj)
+
+
+def is_native_datafusion(obj: Any) -> TypeIs[_NativeDataFusion]:
+    return is_datafusion_dataframe(obj)
 
 
 is_native_duckdb: _Guard[_NativeDuckDB] = is_duckdb_relation

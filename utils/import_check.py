@@ -10,6 +10,7 @@ BANNED_IMPORTS = {
     "dask",
     "dask.dataframe",
     "dask_expr",
+    "datafusion",
     "duckdb",
     "ibis",
     "modin",
@@ -27,6 +28,7 @@ ALLOWED_IMPORTS = {
     "_polars": {"polars"},
     "_duckdb": {"duckdb"},
     "_ibis": {"ibis", "ibis._", "ibis.expr.types"},
+    "_datafusion": {"datafusion"},
 }
 
 

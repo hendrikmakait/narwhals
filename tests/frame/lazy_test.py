@@ -64,12 +64,14 @@ def test_lazy_to_default(constructor_eager: ConstructorEager) -> None:
         Implementation.IBIS,
         Implementation.PYSPARK,
         Implementation.SQLFRAME,
+        Implementation.DATAFUSION,
         "polars",
         "duckdb",
         "dask",
         "ibis",
         "pyspark",
         "sqlframe",
+        "datafusion",
     ],
 )
 def test_lazy(

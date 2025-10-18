@@ -16,12 +16,9 @@ if TYPE_CHECKING:
     from narwhals.stable.v1 import Expr, Series
 
     # All dataframes supported by Narwhals have a
-    # `columns` property. Their similarities don't extend
+    # `join` method. Their similarities don't extend
     # _that_ much further unfortunately...
     class NativeFrame(Protocol):
-        @property
-        def columns(self) -> Any: ...
-
         def join(self, *args: Any, **kwargs: Any) -> Any: ...
 
     class NativeDataFrame(Sized, NativeFrame, Protocol): ...
